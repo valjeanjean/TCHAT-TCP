@@ -114,12 +114,12 @@ void *handle_client(void *arg) {
 
 int main() {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in server_addr = {AF_INET, htons(server_port), INADDR_ANY};
+    struct sockaddr_in server_addr = {AF_INET, htons(SERVER_PORT), INADDR_ANY};
 
     bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     listen(server_fd, MAX_CLIENTS);
 
-    printf("Server started on port %d\n", server_port);
+    printf("Server started on port %d\n", SERVER_PORT);
 
     while (1) {
         struct sockaddr_in client_addr;

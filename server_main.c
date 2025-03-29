@@ -10,6 +10,7 @@
 
 #define SERVER_PORT 3000
 #define MAX_CLIENTS 100
+#define MAX_MSG_LENGTH 255
 
 int clients_ID[MAX_CLIENTS] = {0};
 
@@ -21,7 +22,8 @@ void send_broadcast(char *message, int user_fd){
         if(clients_ID[i] > 0 && clients_ID[i] != user_fd){
             
             //printf("clients id : %d\n", clients_ID[i]);
-            int error = send(clients_ID[i], message, sizeof(message), 0);
+            int error = send(clients_ID[i], message, MAX_MSG_LENGTH, 0);
+            printf("[SEND] Octets envoyés : %d\n", error);
             if(error <= 0){
 
                 printf("Erreur send sur la fonction send_broadcast\n");
@@ -38,11 +40,11 @@ void *handle_client(void *arg){
 
     while(1){
 
-        char packets[BUFSIZ] = {0};
-        int bytes_received = recv(client_fd, packets, sizeof(packets), 0);
+        char packets[MAX_MSG_LENGTH] = {0};
+        int bytes_received = recv(client_fd, packets, MAX_MSG_LENGTH, 0);
         perror("recv");
 
-        printf("Nombre d'octets du message reçu : %d\n\n", bytes_received);
+        printf("[RECV] Nombre d'octets du message reçu : %d\n\n", bytes_received);
 
         if(bytes_received <= 0){
             
@@ -60,8 +62,7 @@ void *handle_client(void *arg){
             close(client_fd);
             break;
         }
-        
-        //memset(packets, 0, sizeof(packets));
+
         send_broadcast(packets, client_fd);
     }
     
@@ -70,7 +71,7 @@ void *handle_client(void *arg){
 
 int create_server(int port){
 
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0); // Mettre 0 définit automatiquement le protocole en TCP ?
+    int server_fd = socket(AF_INET, SOCK_STREAM, 0); 
     
     if(server_fd == -1){
         return EXIT_FAILURE;
@@ -80,7 +81,7 @@ int create_server(int port){
 
         .sin_addr.s_addr = INADDR_ANY,
         .sin_family = AF_INET,
-        .sin_port = htons(port) // Équivalent de atoi
+        .sin_port = htons(port) 
     };
 
     int error = bind(server_fd, (struct sockaddr*) &socket_addr, sizeof socket_addr);
@@ -148,9 +149,6 @@ int main(int argc, char**argv){
         
                 
     }
-        
-
-    //close(client_fd);
-        
+                
     return EXIT_SUCCESS;
 }

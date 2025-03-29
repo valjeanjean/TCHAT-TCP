@@ -32,7 +32,7 @@ void askUsername(char *tab){
 
 int create_client(int port){
 
-    int client_fd = socket(AF_INET, SOCK_STREAM, 0); // Mettre 0 définit automatiquement le protocole en TCP ?
+    int client_fd = socket(AF_INET, SOCK_STREAM, 0);
     client_id = client_fd;
     
     if(client_fd == -1){
@@ -51,13 +51,13 @@ int create_client(int port){
 
 void *handle_recv(void *arg){
 
-    char buffer[TAB_SIZE] = {0};
+    char buffer[MAX_MSG_LENGTH] = {0};
     int client_fd = *(int *)arg;
     
     while(1){
 
-        int bytes_received = recv(client_fd, buffer, TAB_SIZE, 0);
-        printf("Octets reçus par le serveur : %d\n", bytes_received);
+        int bytes_received = recv(client_fd, buffer, MAX_MSG_LENGTH, 0);
+        printf("[RECV] Octets reçus par le client : %d\n", bytes_received);
         //perror("recv");
 
         if(bytes_received <= 0){
@@ -93,9 +93,11 @@ int main(int argc, char **argv){
     printf("Server listen on port : %d\n", server_port);
     
     /* Instanciation des éléments de la struct sur les infos du joueur */
+    /* Mettre ça après le askUsername sinon le pseudo stocké est aléatoire */
     struct info_clients client;
     client.client_fd = client_fd;
     strcpy(client.username, username);
+    printf("Pseudo : %s\n", client.username);
 
     /* Déclaration et instanciation struct relatives au réseau */
                 
@@ -118,6 +120,7 @@ int main(int argc, char **argv){
     }
 
     pthread_create(&recv_thread, NULL, handle_recv, &client_fd);
+    // pthread_detach ?
 
     while(1){
 
@@ -125,9 +128,9 @@ int main(int argc, char **argv){
         printf("\n[%d]> :", client_fd);
         fgets(message, MAX_MSG_LENGTH, stdin);
         message[strcspn(message, "\n")] = '\0';
-        snprintf(buffer, BUFFER_SIZE, "%s: %s", client.username, message);
-        int bytes_sent = send(client_fd, message, MAX_MSG_LENGTH, 0);
-        printf("Octets envoyés au serveur : %d\n\n", bytes_sent);
+        snprintf(buffer, BUFFER_SIZE, "%s: %s", client.username, message); 
+        int bytes_sent = send(client_fd, buffer, MAX_MSG_LENGTH, 0);
+        printf("[SEND] Octets envoyés au serveur : %d\n\n", bytes_sent);
         //perror("send");
     
         if(bytes_sent == -1){

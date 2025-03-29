@@ -21,9 +21,9 @@ void list_users(char *user_msg, int user_fd){
     printf("Commande list:\n");
     fgets(user_msg, TAB_SIZE, stdin);
 
-    int strcmp_value = strcmp(user_msg, list_command);
+    int is_cmd_list = strcmp(user_msg, list_command);
 
-    if(strcmp_value == 0){
+    if(is_cmd_list == 0){
 
         for(int i = 0; i < MAX_CLIENTS; i++){
 
