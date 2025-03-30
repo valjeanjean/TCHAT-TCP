@@ -25,8 +25,9 @@ struct info_clients{
 
 void askUsername(char *tab){
 
-    printf("Veuillez saisir votre pseudo :\n");
+    printf("Veuillez saisir votre pseudo :\n\n");
     fgets(tab, USERNAME_LENGTH, stdin);
+    tab[strcspn(tab, "\n")] = '\0';
     printf("Vous avez choisi le pseudo %s\n\n", tab);
 }
 
@@ -57,7 +58,7 @@ void *handle_recv(void *arg){
     while(1){
 
         int bytes_received = recv(client_fd, buffer, MAX_MSG_LENGTH, 0);
-        printf("[RECV] Octets reçus par le client : %d\n", bytes_received);
+        //printf("[RECV] Octets reçus par le client : %d\n", bytes_received);
         //perror("recv");
 
         if(bytes_received <= 0){
@@ -67,11 +68,8 @@ void *handle_recv(void *arg){
             break;
         }
 
-        printf("Message client : %s\n", buffer);
+        printf("\n%s\n\n", buffer);
         
-        //printf("client_fd = %d\n\n", client_fd);
-        //printf("bytes_received = %d\n", bytes_received);
-        //memset(buffer, 0, sizeof(buffer));
     }
 }
 
@@ -93,25 +91,25 @@ int main(int argc, char **argv){
     printf("Server listen on port : %d\n", server_port);
     
     /* Instanciation des éléments de la struct sur les infos du joueur */
-    /* Mettre ça après le askUsername sinon le pseudo stocké est aléatoire */
-    struct info_clients client;
-    client.client_fd = client_fd;
-    strcpy(client.username, username);
-    printf("Pseudo : %s\n", client.username);
-
+    
     /* Déclaration et instanciation struct relatives au réseau */
-                
+    
     struct sockaddr_in socket_addr = {
-
+        
         .sin_addr.s_addr = INADDR_ANY,
         .sin_family = AF_INET,
         .sin_port = htons(server_port) // Équivalent de atoi
     };
-
+    
     int error = connect(client_fd, (struct sockaddr*) &socket_addr, sizeof(socket_addr));
     //perror("connect");
-
+    
     askUsername(username);
+   
+    /* Mettre ça après le askUsername sinon le pseudo stocké est aléatoire */
+    struct info_clients client;
+    client.client_fd = client_fd;
+    strcpy(client.username, username);
 
     if(error == -1){
 
@@ -120,17 +118,18 @@ int main(int argc, char **argv){
     }
 
     pthread_create(&recv_thread, NULL, handle_recv, &client_fd);
-    // pthread_detach ?
+    pthread_detach(recv_thread);
 
     while(1){
 
-        char message[MAX_MSG_LENGTH] = {0}, buffer[TAB_SIZE] = {0};
-        printf("\n[%d]> :", client_fd);
+        char message[MAX_MSG_LENGTH] = {0}, buffer[BUFFER_SIZE] = {0};
+        printf("[%s] > : ", username);
         fgets(message, MAX_MSG_LENGTH, stdin);
         message[strcspn(message, "\n")] = '\0';
-        snprintf(buffer, BUFFER_SIZE, "%s: %s", client.username, message); 
+        client.username[strcspn(client.username, "\n")] = '\0';
+        snprintf(buffer, BUFFER_SIZE, "[%s] > : %s", client.username, message); 
         int bytes_sent = send(client_fd, buffer, MAX_MSG_LENGTH, 0);
-        printf("[SEND] Octets envoyés au serveur : %d\n\n", bytes_sent);
+        //printf("[SEND] Octets envoyés au serveur : %d\n\n", bytes_sent);
         //perror("send");
     
         if(bytes_sent == -1){

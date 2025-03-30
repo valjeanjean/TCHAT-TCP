@@ -3,15 +3,14 @@ Corrections à faire côté client :
 - Les clients peuvent voir les messages des autres, mais après le premier envoi, il n'y a plus l'affichage ( [FD]> : ) indiquant qu'il peut écrire.
   Le message s'envoie tout de même si il appuie sur entrée après avoir écrit malgré le non affichage d'indication.
  
-- Faire en sorte que le pseudo du joueur apparaisse dans le tchat comme ceci : ([PseudoDuJoueur]> :)
+- 
 
-- Faire en sorte que les messages des autres joueurs soient affichés avec leurs pseudos respectifs.
-- snprintf() permet de construire une chaîne de texte en insérant des valeurs dynamiquement. L'utiliser pour lors du send du message par le client, envoyer son pseudo : le message
-  pour que tous les clients voient les pseudos.
-- Messages tronqués côté client, les autres clients reçoivent les phrases/mots coupés, vérifier fgets et les TAB_SIZE
-- FAire attention à la taille du buffer envoyé par snprintf
-- Problème d'affichage du pseudo lors de la redistribution du message par le serveur. Exemple : 
-  " Message client : t'��1: salut "
+- 
+- 
+- 
+- 
+- 
+  
 - 
 - 
 - 
