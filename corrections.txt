@@ -18,6 +18,12 @@ Corrections à faire côté client :
 - 
 
 
+Comment faire un salon ?
+
+Faire une fonction de reconnaissance de la commande /salon create [nom_du_salon] et attribuer un ID à l'utilisateur créant ce salon ?
+Faire une autre fonction pour rejoindre un salon ? Stocker les ID salons dans un tableau en global, puis faire un algo pour reconnaître
+l'ID du salon sélectionné et le faire rejoindre ?
+
 
 Corrections à faire côté serveur : 
 

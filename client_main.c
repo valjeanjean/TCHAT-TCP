@@ -58,8 +58,7 @@ void *handle_recv(void *arg){
     while(1){
 
         int bytes_received = recv(client_fd, buffer, MAX_MSG_LENGTH, 0);
-        //printf("[RECV] Octets reçus par le client : %d\n", bytes_received);
-        //perror("recv");
+        
 
         if(bytes_received <= 0){
             

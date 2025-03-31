@@ -9,21 +9,58 @@
 #define SERVER_PORT 3000
 #define TAB_SIZE 255
 #define MAX_CLIENTS 15
+#define MAX_SALONS 10
+#define EQUAL 0
 
 int clients_id[MAX_CLIENTS];
+int salons_ID[MAX_SALONS] = {1, 2, 3, 4, 5}; //exemple
+
+void checkSalon(){
+
+
+
+}
+
+void create_salon(char *user_msg, int user_fd){
+
+    char create_salonCommand[] = "/salon create\n";
+    // puis if %d après /salon create == salonID_stock[i], printf("Salon déjà utilisé, faites /salon join %d utilisé pour rejoindre le salon");
+
+    //printf("Pour créer un salon, veuillez utiliser la commande /salon create [NuméroDeSalon] :\n");
+
+    // Utiliser strncmp
+    int create_salon = strncmp(user_msg, create_salonCommand, 13);
+    int i = 0;
+
+    if(create_salon == EQUAL){
+        
+        for(i = 0; i < MAX_CLIENTS; i++){
+            
+            // Finir la condition avec && pour vérifier que l'ID alloué n'a pas déjà été attribué, et faire en sorte que l'ID du salon soit supprimé lorsque 
+            // plus aucun client n'est dans ce salon.
+            
+            if(salons_ID[i] == 0){ 
+                
+                sscanf(user_msg, "/salon create %d\n", &salons_ID[i]);
+                printf("Salon créé! Numéro de salon : %d\n", salons_ID[i]);
+                break;
+            }
+        }
+    }
+}
 
 /* Modèle commande pour quitter le tchat */
 /* FONCTIONS POUR LE CLIENT */
-void list_users(char *user_msg, int user_fd){
+void command_list(char *user_msg, int user_fd){
 
-    char list_command[] = "/list\n";
-    
-    printf("Commande list:\n");
-    fgets(user_msg, TAB_SIZE, stdin);
+    char list_command[] = "/list users\n";
+    //printf("Commande list:\n");
+    char list_salons[] = "/list salons\n";
 
     int is_cmd_list = strcmp(user_msg, list_command);
+    int is_cmd_salon = strcmp(user_msg, list_salons);
 
-    if(is_cmd_list == 0){
+    if(is_cmd_list == EQUAL){
 
         for(int i = 0; i < MAX_CLIENTS; i++){
 
@@ -34,19 +71,31 @@ void list_users(char *user_msg, int user_fd){
                 printf("Client %d connecté\n", clients_id[i]);
             }
         }
-    }    
+    }
+    
+    if(is_cmd_salon == EQUAL){
+
+        for(int i = 0; i < MAX_SALONS; i++){
+
+            if(salons_ID[i] != 0){
+
+                printf("Salon %d ouvert\n", salons_ID[i]); //cmt faire l'affichage des salons
+            }
+        }
+
+        printf("Utilisez la commande /join salon [numéro_du_salon] pour rejoindre un des salons!\n");
+    }
 }
 
 int leave_tchat(char *user_msg){
     
     char quit_command[] = "/quit\n";
     
-    printf("Commande leave:\n");
-    fgets(user_msg, TAB_SIZE, stdin);
+    //printf("Commande leave:\n");
 
     int value_strcmp = strcmp(user_msg, quit_command);
 
-    if(value_strcmp == 0){
+    if(value_strcmp == EQUAL){
 
         return 1;
     }
@@ -60,11 +109,13 @@ int main(){
 
     int own_fd = 3;
 
-    char tab[TAB_SIZE];
-    int value = sizeof(tab);
-    printf("Valeur sizeof(tab) = %d\n\n", value);
+    char client_msg[TAB_SIZE];
+    int value = sizeof(client_msg);
 
-    if((leave_tchat(tab)) == 1){
+    printf("Veuillez entrer une phrase :\n");
+    fgets(client_msg, sizeof(client_msg), stdin);
+
+    if((leave_tchat(client_msg)) == 1){
 
         printf("Vous avez choisi de vous déco\n");
         return EXIT_FAILURE;
@@ -72,8 +123,10 @@ int main(){
 
     char tab2[TAB_SIZE];
 
-    list_users(tab2, own_fd);
+    command_list(client_msg, own_fd);
 
+    create_salon(client_msg, own_fd);
+    
 
 
     return 0;
