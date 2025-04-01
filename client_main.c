@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+/* POUR LANCER LE CLIENT, UTILISER L'ALIAS : client_connect */
+
 #define SERVER_PORT 3000
 #define CLIENT_PORT 4000
 #define USERNAME_LENGTH 50
@@ -126,7 +128,9 @@ int main(int argc, char **argv){
         fgets(message, MAX_MSG_LENGTH, stdin);
         message[strcspn(message, "\n")] = '\0';
         client.username[strcspn(client.username, "\n")] = '\0';
+
         snprintf(buffer, BUFFER_SIZE, "[%s] > : %s", client.username, message); 
+        
         int bytes_sent = send(client_fd, buffer, MAX_MSG_LENGTH, 0);
         //printf("[SEND] Octets envoyés au serveur : %d\n\n", bytes_sent);
         //perror("send");

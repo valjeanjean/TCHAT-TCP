@@ -13,20 +13,20 @@
 #define EQUAL 0
 
 int clients_id[MAX_CLIENTS];
-int salons_ID[MAX_SALONS] = {1, 2, 3, 4, 5}; //exemple
+int salons_ID[MAX_SALONS] = {1, 2, 3, 4, 5}; //exemple 
+char username[TAB_SIZE] = "Gianluigi";
 
 void checkSalon(){
-
-
-
+    
+    
+    
 }
 
+/* Mettre côté serveur create_salon */
 void create_salon(char *user_msg, int user_fd){
 
     char create_salonCommand[] = "/salon create\n";
     // puis if %d après /salon create == salonID_stock[i], printf("Salon déjà utilisé, faites /salon join %d utilisé pour rejoindre le salon");
-
-    //printf("Pour créer un salon, veuillez utiliser la commande /salon create [NuméroDeSalon] :\n");
 
     // Utiliser strncmp
     int create_salon = strncmp(user_msg, create_salonCommand, 13);
@@ -41,6 +41,7 @@ void create_salon(char *user_msg, int user_fd){
             
             if(salons_ID[i] == 0){ 
                 
+                printf("Itération de i numéro : %d\n\n", i);
                 sscanf(user_msg, "/salon create %d\n", &salons_ID[i]);
                 printf("Salon créé! Numéro de salon : %d\n", salons_ID[i]);
                 break;
@@ -51,6 +52,7 @@ void create_salon(char *user_msg, int user_fd){
 
 /* Modèle commande pour quitter le tchat */
 /* FONCTIONS POUR LE CLIENT */
+/* MODIFIER CAR J'AI FAIT UN TABLEAU EN DUR POUR TESTER AVEC UN PSEUDO & UN TABLEAU AVEC DE FAKES ID */
 void command_list(char *user_msg, int user_fd){
 
     char list_command[] = "/list users\n";
@@ -62,13 +64,15 @@ void command_list(char *user_msg, int user_fd){
 
     if(is_cmd_list == EQUAL){
 
+        printf("\n\033[0;34muser_id\t\033[0m\033[0;31mNom d'utilisateur\033[0m\n\n");
+
         for(int i = 0; i < MAX_CLIENTS; i++){
 
             clients_id[i] = i + 1;
 
             if(clients_id[i] != user_fd && clients_id[i] != 0){
 
-                printf("Client %d connecté\n", clients_id[i]);
+                printf("\033[0;34m%d\033[0m\t\033[0;31m%s\033[0m\n", clients_id[i], username);
             }
         }
     }
@@ -79,11 +83,11 @@ void command_list(char *user_msg, int user_fd){
 
             if(salons_ID[i] != 0){
 
-                printf("Salon %d ouvert\n", salons_ID[i]); //cmt faire l'affichage des salons
+                printf("\nSalon \033[0;34m%d\033[0m ouvert\n", salons_ID[i]); //cmt faire l'affichage des salons
             }
         }
 
-        printf("Utilisez la commande /join salon [numéro_du_salon] pour rejoindre un des salons!\n");
+        printf("\nUtilisez la commande /join salon [numéro_du_salon] pour rejoindre un des salons!\n");
     }
 }
 

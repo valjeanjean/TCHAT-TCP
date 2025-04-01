@@ -8,11 +8,22 @@
 #include <errno.h>
 #include <pthread.h>
 
+/* POUR LANCER LE SERVEUR, UTILISER L'ALIAS : server_connect */
+
 #define SERVER_PORT 3000
 #define MAX_CLIENTS 100
 #define MAX_MSG_LENGTH 255
 
+/* Utiliser struct pour y stocker infos : FD, salon id &  */
+struct clients_infos{
+
+    int client_fd;
+    int salon_id;
+};
+
 int clients_ID[MAX_CLIENTS] = {0};
+
+struct clients_infos clients[MAX_CLIENTS] = {0};
 
 /* Fonction de renvoi des messages clients */
 void send_broadcast(char *message, int user_fd){
@@ -21,9 +32,9 @@ void send_broadcast(char *message, int user_fd){
 
         if(clients_ID[i] > 0 && clients_ID[i] != user_fd){
             
-            //printf("clients id : %d\n", clients_ID[i]);
             int error = send(clients_ID[i], message, MAX_MSG_LENGTH, 0);
             printf("[SEND] Octets envoyés : %d\n", error);
+
             if(error <= 0){
 
                 printf("Erreur send sur la fonction send_broadcast\n");
@@ -137,8 +148,15 @@ int main(int argc, char**argv){
                 break;
             }
 
-            if(clients_ID[i] == 0){
-                
+            /* RÉFLÉCHIR AU NIVEAU DE L'INTÉGRATION/UTILISATION DE LA STRUCT */
+
+            if(clients[i].client_fd == 0){
+                struct clients_infos new_client = {
+                    .client_fd = client_fd,
+                    .salon_id = -1
+                };
+                clients[i] = new_client;
+
                 clients_ID[i] = client_fd;
                 break;
             }
