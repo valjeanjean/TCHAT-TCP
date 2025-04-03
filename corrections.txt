@@ -9,7 +9,18 @@ Corrections à faire côté client :
 - 
 - 
 - 
-- 
+- Faire une fonction pour rejoindre un salon existant, il faudra /list salons, puis /join salon [salon_ID].
+ ensuite faire un if(%d de [salon_ID] == clients[i].salon_id){
+
+    alors 
+
+    clients[i].client_fd == user_fd;
+    int compteur = i;
+    clients[compteur].salon_ID = 
+
+    bref à développer
+
+ }
   
 - 
 - 
