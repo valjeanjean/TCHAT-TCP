@@ -17,12 +17,15 @@
 #define TAB_SIZE 255
 #define LIST_USERS 1
 #define LIST_SALONS 2
+#define INFOS_TAB 30
+#define ONLINE 1
 
 /* Utiliser struct pour y stocker infos : FD, salon id &  */
 struct clients_infos{
 
     int client_fd;
     int salon_id;
+    int status;
 };
 
 struct clients_infos clients[MAX_CLIENTS] = {0};
@@ -30,11 +33,10 @@ struct clients_infos clients[MAX_CLIENTS] = {0};
 /* Mettre côté serveur create_salon */
 void create_salon(char *user_msg, int user_fd){
 
-    char create_salonCommand[] = "/salon create";
     // puis if %d après /salon create == salonID_stock[i], printf("Salon déjà utilisé, faites /salon join %d utilisé pour rejoindre le salon");
 
     // Utiliser strncmp
-    int create_salon = strncmp(user_msg, create_salonCommand, 13);
+    int create_salon = strncmp(user_msg, "/salon create", 13);
 
     //printf("message client : %s\n\n", user_msg);
     //printf("commande salon create : %s\n\n", create_salonCommand);
@@ -42,7 +44,7 @@ void create_salon(char *user_msg, int user_fd){
 
     int i = 0;
 
-    if(create_salon == 0){
+    if(create_salon == EQUAL){
         
         for(i = 0; i < MAX_CLIENTS; i++){
             
@@ -100,12 +102,8 @@ void send_broadcast(char *message, int user_fd){
 
 int check_list_cmd(char *message){
 
-    char list_users[] = "/list users";
-    //printf("Commande list:\n");
-    char list_salons[] = "/list salons\n";
-
-    int is_list_users = strncmp(message, list_users, 11);
-    int is_list_salons = strncmp(message, list_salons, 12);
+    int is_list_users = strncmp(message, "/list users", 11);
+    int is_list_salons = strncmp(message, "/list salons", 12);
 
     if(is_list_users == EQUAL){
 
@@ -154,7 +152,27 @@ void *handle_client(void *arg){
         }
 
         create_salon(packets, client_fd);
-        check_list_cmd(packets);
+        int is_list = check_list_cmd(packets);
+
+        char online_users[INFOS_TAB][INFOS_TAB];
+        printf("taille tab = %ld", sizeof(online_users));
+
+        /* Marche pas, affiche seulement un seul joueur connecté alors qu'il y en a plusieurs */
+
+        if(is_list == LIST_USERS){
+
+            for(int i = 0; i < MAX_CLIENTS; i++){
+
+                if(clients[i].status == ONLINE && clients[i].client_fd != client_fd){
+
+                    sprintf(online_users[i], "Client %d connecté\n", clients[i].client_fd);
+                    printf("%s\n", online_users[i]);
+                }
+            }
+            
+            send(client_fd, online_users, INFOS_TAB, 0);
+        }
+
         send_broadcast(packets, client_fd);
     }
     
@@ -252,6 +270,7 @@ int main(int argc, char**argv){
                 clients[i].client_fd = client_fd;
                 //printf("client_fd du client %d = %d\n", i, clients[i].client_fd);
                 clients[i].salon_id = -1;
+                clients[i].status = ONLINE;
                 //printf("salon_id = %d\n", clients[i].salon_id);
 
                 break;
