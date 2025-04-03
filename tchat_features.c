@@ -15,6 +15,7 @@
 int clients_id[MAX_CLIENTS];
 int salons_ID[MAX_SALONS] = {1, 2, 3, 4, 5}; //exemple 
 char username[TAB_SIZE] = "Gianluigi";
+int compteur = -1;
 
 void checkSalon(){
     
@@ -43,6 +44,7 @@ void create_salon(char *user_msg, int user_fd){
                 
                 printf("Itération de i numéro : %d\n\n", i);
                 sscanf(user_msg, "/salon create %d\n", &salons_ID[i]);
+                compteur = i;
                 printf("Salon créé! Numéro de salon : %d\n", salons_ID[i]);
                 break;
             }

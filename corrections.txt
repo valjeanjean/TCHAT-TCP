@@ -15,7 +15,13 @@ Corrections à faire côté client :
 - 
 - 
 - 
-- 
+- Gestion future des salons de discussion
+
+  Actuellement, tous les clients reçoivent les messages via send_broadcast().
+
+  Avec salon_id, on pourrait filtrer les messages pour qu’ils soient envoyés uniquement aux clients du même salon, grâce à la struct, en mettant
+  une valeur de base à salon_id de -1, et avoir -1 en salon_id signifie qu'on se trouve dans le salon world. 
+
 
 
 Comment faire un salon ?
