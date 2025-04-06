@@ -21,6 +21,7 @@
 #define LIST_SALONS 2
 #define CREATE_SALON 1
 #define JOIN_SALON 1
+#define SEND_MP 1
 
 int client_id = -1;
 
@@ -133,6 +134,22 @@ int check_list_cmd(char *message){
 
 }
 
+int check_privateMessage(char *message){
+
+    char send_MP[] = "/msg";
+    int isEqual = strncmp(send_MP, message, 4);
+
+    if(isEqual == EQUAL){
+
+        return 1;
+   
+    }else{
+
+        return 0;
+    }
+
+}
+
 int check_joinSalon(char *message){
 
     char joinSalon_cmd[] = "/join salon";
@@ -205,12 +222,12 @@ int main(int argc, char **argv){
         client.username[strcspn(client.username, "\n")] = '\0';
 
         int create_salon = check_create_salon(message);
-        //printf("create_salon = %d\n", create_salon);
         
         int list_command = check_list_cmd(message);
-        //printf("list_command = %d\n", list_command);
-
+        
         int join_salon_command = check_joinSalon(message);
+
+        int send_mp_to = check_privateMessage(message);
 
         if(create_salon != CREATE_SALON && list_command != LIST_USERS && list_command != LIST_SALONS && join_salon_command != JOIN_SALON){
               
@@ -225,7 +242,7 @@ int main(int argc, char **argv){
         }
 
 
-        if(create_salon == CREATE_SALON || list_command == LIST_USERS || list_command == LIST_SALONS || join_salon_command == JOIN_SALON){
+        if(create_salon == CREATE_SALON || list_command == LIST_USERS || list_command == LIST_SALONS || join_salon_command == JOIN_SALON || send_mp_to == SEND_MP){
 
             int bytes_sent = send(client_fd, message, MAX_MSG_LENGTH, 0);
             //printf("Message : %s\n", message);

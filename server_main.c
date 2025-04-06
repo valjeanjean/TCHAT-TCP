@@ -23,6 +23,7 @@
 #define ONLINE 1
 #define JOIN 1
 #define BIG_SIZE 600
+#define SEND 1
 
 /* Utiliser struct pour y stocker infos : FD, salon id &  */
 struct clients_infos{
@@ -104,6 +105,7 @@ void send_broadcast(char *message, int user_fd){
     }
 }
 
+/* Vérifie si la commande /list a été entrée, return -1 pour faux */
 int check_list_cmd(char *message){
 
     int is_list_users = strncmp(message, "/list users", 11);
@@ -124,6 +126,24 @@ int check_list_cmd(char *message){
 
 }
 
+/* Vérifie si la commande /msg a été entrée */
+int check_privateMessage(char *message){
+
+    char send_MP[] = "/msg";
+    int isEqual = strncmp(send_MP, message, 4);
+
+    if(isEqual == EQUAL){
+
+        return 1;
+   
+    }else{
+
+        return 0;
+    }
+
+}
+
+/* Vérifie que la commande /join salon a été entrée */
 int check_joinSalon(char *message){
 
     char joinSalon_cmd[] = "/join salon";
@@ -174,6 +194,7 @@ void *handle_client(void *arg){
         create_salon(packets, client_fd);
         int is_list = check_list_cmd(packets);
         int is_join = check_joinSalon(packets);
+        int send_MP = check_privateMessage(packets);
         char online_users[INFOS_TAB] = {0};
         //char user_online_IDs[BIG_SIZE] = {0};
         printf("taille tab = %ld\n", sizeof(online_users));
@@ -224,7 +245,33 @@ void *handle_client(void *arg){
             }
         }
 
-        send_broadcast(packets, client_fd);
+        if(send_MP == SEND){
+
+            int chars_read = 0;
+            int send_mp_to = 0;
+            sscanf(packets, "/msg %d %n", &send_mp_to, &chars_read);
+            char *mp_sent = packets + chars_read;
+            printf("MP qui sera reçu : %s\n", mp_sent);
+
+            for(int i = 0; i < MAX_CLIENTS; i++){
+
+                if(clients[i].client_fd == send_mp_to){
+
+                    int length = strlen(mp_sent);
+                    send(clients[i].client_fd, mp_sent, length, 0);
+                    break;
+                }
+            }
+        }
+
+        printf("send_MP = %d\t is_list = %d\t is_join = %d\n", send_MP, is_list, is_join);
+        if(send_MP == 0 && is_list == -1 && is_join == 0){
+
+            send_broadcast(packets, client_fd);
+        }else{
+
+            printf("Commande privée non généralement notifiée!\n");
+        }
     }
     
     return NULL;
