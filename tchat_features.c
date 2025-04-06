@@ -23,6 +23,22 @@ void checkSalon(){
     
 }
 
+int check_joinSalon(char *message){
+
+    char joinSalon_cmd[] = "/join salon";
+    int isEqual = strncmp(joinSalon_cmd, message, 10);
+
+    if(isEqual == EQUAL){
+
+        return 1;
+   
+    }else{
+
+        return 0;
+    }
+
+}
+
 /* Mettre côté serveur create_salon */
 void create_salon(char *user_msg, int user_fd){
 
@@ -129,6 +145,8 @@ int main(){
         return EXIT_FAILURE;
     }
 
+    int is_join = check_joinSalon(user_msg);
+    
     char tab2[TAB_SIZE];
 
     command_list(client_msg, own_fd);

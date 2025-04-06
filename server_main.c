@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+/* Utiliser commande server_connect pour lancer le serveur */
+
 #define SERVER_PORT 3000
 #define MAX_CLIENTS 100
 #define MAX_MSG_LENGTH 300
@@ -17,8 +19,10 @@
 #define TAB_SIZE 255
 #define LIST_USERS 1
 #define LIST_SALONS 2
-#define INFOS_TAB 30
+#define INFOS_TAB 300
 #define ONLINE 1
+#define JOIN 1
+#define BIG_SIZE 600
 
 /* Utiliser struct pour y stocker infos : FD, salon id &  */
 struct clients_infos{
@@ -120,6 +124,22 @@ int check_list_cmd(char *message){
 
 }
 
+int check_joinSalon(char *message){
+
+    char joinSalon_cmd[] = "/join salon";
+    int isEqual = strncmp(joinSalon_cmd, message, 10);
+
+    if(isEqual == EQUAL){
+
+        return 1;
+   
+    }else{
+
+        return 0;
+    }
+
+}
+
 void *handle_client(void *arg){
 
     int client_fd = *(int *)arg;
@@ -153,24 +173,55 @@ void *handle_client(void *arg){
 
         create_salon(packets, client_fd);
         int is_list = check_list_cmd(packets);
-
-        char online_users[INFOS_TAB][INFOS_TAB];
-        printf("taille tab = %ld", sizeof(online_users));
+        int is_join = check_joinSalon(packets);
+        char online_users[INFOS_TAB] = {0};
+        //char user_online_IDs[BIG_SIZE] = {0};
+        printf("taille tab = %ld\n", sizeof(online_users));
 
         /* Marche pas, affiche seulement un seul joueur connecté alors qu'il y en a plusieurs */
+        /* Corrigé mais l'affichage se fait 1 par 1, donc si un autre client envoie un message au même moment, il s'intercalera entre 2 printf de clients connectés */
 
         if(is_list == LIST_USERS){
 
             for(int i = 0; i < MAX_CLIENTS; i++){
 
-                if(clients[i].status == ONLINE && clients[i].client_fd != client_fd){
+                if(clients[i].status == ONLINE && clients[i].client_fd != client_fd && clients[i].client_fd > 3){
 
-                    sprintf(online_users[i], "Client %d connecté\n", clients[i].client_fd);
-                    printf("%s\n", online_users[i]);
+                    sprintf(online_users, "\nClient %d connecté",clients[i].client_fd);
+                    printf("%s\n", online_users);
+                    send(client_fd, online_users, INFOS_TAB, 0);
                 }
             }
             
-            send(client_fd, online_users, INFOS_TAB, 0);
+        }else if(is_list == LIST_SALONS){
+
+            char available_salon[INFOS_TAB] = {0};
+
+            for(int i = 0; i < MAX_CLIENTS; i++){
+
+                if(clients[i].status == ONLINE && clients[i].salon_id > 0){
+
+                    sprintf(available_salon, "\nSalon %d ouvert",clients[i].salon_id);
+                    printf("%s\n", online_users);
+                    send(client_fd, available_salon, INFOS_TAB, 0);
+                }
+            }
+        }
+
+        for(int i = 0; i < MAX_CLIENTS; i++){
+        
+            if(is_join == JOIN && clients[i].client_fd == client_fd){
+
+                int temp_salon_id = 0;
+                char tab[TAB_SIZE];
+
+                sscanf(packets, "/join salon %d", &temp_salon_id); // Mettre variable de l'utilisateur envoyant le truc
+                clients[i].salon_id = temp_salon_id;
+                sprintf(tab, "Salon %d rejoint!\n", clients[i].salon_id);
+                send(client_fd, tab, TAB_SIZE, 0);
+
+                break;            
+            }
         }
 
         send_broadcast(packets, client_fd);
@@ -214,23 +265,6 @@ int create_server(int port){
 
     return server_fd;
 }
-
-int check_joinSalon(char *message){
-
-    char joinSalon_cmd[] = "/join salon";
-    int isEqual = strncmp(joinSalon_cmd, message, 10);
-
-    if(isEqual == EQUAL){
-
-        return 1;
-   
-    }else{
-
-        return 0;
-    }
-
-}
-
 
 int main(int argc, char**argv){
 

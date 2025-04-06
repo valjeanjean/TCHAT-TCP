@@ -36,8 +36,12 @@ void askUsername(char *tab){
     fgets(tab, USERNAME_LENGTH, stdin);
     tab[strcspn(tab, "\n")] = '\0';
     printf("Vous avez choisi le pseudo %s\n\n", tab);
-}
+    printf("Bienvenue dans TCHAT TCP!\n\n");
+    //printf("Vous pouvez utiliser les commandes suivantes :\n\n");
+    //printf("/salon create [numéro_de_salon] pour créer un salon. & /join salon [numéro_de_salon] pour en rejoindre un\n");
+    //printf("/list users & /list salons\n");
 
+}
 
 int create_client(int port){
 
@@ -67,7 +71,7 @@ void *handle_recv(void *arg){
         char buffer[TAB_SIZE] = {0};
 
         int bytes_received = recv(client_fd, buffer, TAB_SIZE, 0);
-        perror("\nrecv");
+        //perror("\nrecv");
         
         if(bytes_received <= 0){
             
