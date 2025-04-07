@@ -31,6 +31,8 @@ struct info_clients{
     char username[USERNAME_LENGTH];
 };
 
+struct info_clients client;
+
 void askUsername(char *tab){
 
     printf("Veuillez saisir votre pseudo :\n\n");
@@ -131,7 +133,6 @@ int check_list_cmd(char *message){
 
         return -1;
     }
-
 }
 
 int check_privateMessage(char *message){
@@ -200,7 +201,6 @@ int main(int argc, char **argv){
     askUsername(username);
    
     /* Mettre ça après le askUsername sinon le pseudo stocké est aléatoire */
-    struct info_clients client;
     client.client_fd = client_fd;
     strcpy(client.username, username);
 
@@ -229,7 +229,7 @@ int main(int argc, char **argv){
 
         int send_mp_to = check_privateMessage(message);
 
-        if(create_salon != CREATE_SALON && list_command != LIST_USERS && list_command != LIST_SALONS && join_salon_command != JOIN_SALON){
+        if(create_salon != CREATE_SALON && list_command != LIST_USERS && list_command != LIST_SALONS && join_salon_command != JOIN_SALON && send_mp_to != SEND_MP){
               
             snprintf(buffer, BUFFER_SIZE, "[%s] > : %s", client.username, message); 
             int bytes_sent = send(client_fd, buffer, MAX_MSG_LENGTH, 0);
@@ -239,10 +239,7 @@ int main(int argc, char **argv){
                 printf("Erreur\n");
                 break;
             }
-        }
-
-
-        if(create_salon == CREATE_SALON || list_command == LIST_USERS || list_command == LIST_SALONS || join_salon_command == JOIN_SALON || send_mp_to == SEND_MP){
+        }else{
 
             int bytes_sent = send(client_fd, message, MAX_MSG_LENGTH, 0);
             //printf("Message : %s\n", message);

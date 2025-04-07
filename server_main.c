@@ -9,6 +9,7 @@
 #include <pthread.h>
 
 /* Utiliser commande server_connect pour lancer le serveur */
+/* Code copié du fichier test (testserver.c) */
 
 #define SERVER_PORT 3000
 #define MAX_CLIENTS 100
@@ -227,28 +228,29 @@ void *handle_client(void *arg){
                     send(client_fd, available_salon, INFOS_TAB, 0);
                 }
             }
-        }
+        }else if(is_join == JOIN ){
 
-        for(int i = 0; i < MAX_CLIENTS; i++){
-        
-            if(is_join == JOIN && clients[i].client_fd == client_fd){
+                for(int i = 0; i < MAX_CLIENTS; i++){
 
-                int temp_salon_id = 0;
-                char tab[TAB_SIZE];
+                    if(clients[i].client_fd == client_fd){
 
-                sscanf(packets, "/join salon %d", &temp_salon_id); // Mettre variable de l'utilisateur envoyant le truc
-                clients[i].salon_id = temp_salon_id;
-                sprintf(tab, "Salon %d rejoint!\n", clients[i].salon_id);
-                send(client_fd, tab, TAB_SIZE, 0);
-
-                break;            
+                        int temp_salon_id = 0;
+                        char tab[TAB_SIZE];
+                        
+                        sscanf(packets, "/join salon %d", &temp_salon_id); // Mettre variable de l'utilisateur envoyant le truc
+                        clients[i].salon_id = temp_salon_id;
+                        sprintf(tab, "Salon %d rejoint!\n", clients[i].salon_id);
+                        send(client_fd, tab, TAB_SIZE, 0);
+                        
+                        break;            
+                    }
             }
-        }
 
-        if(send_MP == SEND){
+        }else if(send_MP == SEND){
 
             int chars_read = 0;
             int send_mp_to = 0;
+            char pm_sent[BIG_SIZE] = {0};
             sscanf(packets, "/msg %d %n", &send_mp_to, &chars_read);
             char *mp_sent = packets + chars_read;
             printf("MP qui sera reçu : %s\n", mp_sent);
@@ -258,20 +260,17 @@ void *handle_client(void *arg){
                 if(clients[i].client_fd == send_mp_to){
 
                     int length = strlen(mp_sent);
+                    sprintf()
                     send(clients[i].client_fd, mp_sent, length, 0);
                     break;
                 }
             }
-        }
 
-        printf("send_MP = %d\t is_list = %d\t is_join = %d\n", send_MP, is_list, is_join);
-        if(send_MP == 0 && is_list == -1 && is_join == 0){
-
-            send_broadcast(packets, client_fd);
         }else{
-
-            printf("Commande privée non généralement notifiée!\n");
+        
+        send_broadcast(packets, client_fd);
         }
+
     }
     
     return NULL;
@@ -331,10 +330,9 @@ int main(int argc, char**argv){
         int client_fd = accept(server_fd, (struct sockaddr*) &client_addr, &len);
         perror("accept");
     
-        if(client_fd < 3){ // if client_fd < 4 ?
+        if(client_fd < 3){ 
             
             close(client_fd);
-            // continue ?
             close(server_fd);
             return EXIT_FAILURE;
         }
@@ -349,10 +347,9 @@ int main(int argc, char**argv){
             if(clients[i].client_fd == 0){
                 
                 clients[i].client_fd = client_fd;
-                //printf("client_fd du client %d = %d\n", i, clients[i].client_fd);
+                printf("Client %d vient de se connecter au serveur\n", clients[i].client_fd);
                 clients[i].salon_id = -1;
                 clients[i].status = ONLINE;
-                //printf("salon_id = %d\n", clients[i].salon_id);
 
                 break;
             }
